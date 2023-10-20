@@ -22,9 +22,10 @@ class FaceDetector:
         if ret:
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             faces = self.face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
+            confidence = 0
             for (x, y, w, h) in faces:
-                return x, y, w, h
-        return 0, 0, 0, 0  # retourne des valeurs par défaut si aucune détection
+                return x, y, w, h, confidence
+        return 0, 0, 0, 0, 0  # retourne des valeurs par défaut si aucune détection
 
     def draw_face_rectangle(self, frame, x, y, w, h):
         cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)

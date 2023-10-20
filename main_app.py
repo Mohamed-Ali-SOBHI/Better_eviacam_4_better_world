@@ -4,7 +4,7 @@ from PIL import Image, ImageTk
 import cv2
 import threading
 from face_detector import FaceDetector  # Assurez-vous que face_detector.py est dans le même répertoire
-# from mouse_mover import MouseMover  # Uncomment this if you have the MouseMover class implemented
+from mouse_mover import MouseMover  # Uncomment this if you have the MouseMover class implemented
 
 class App:
     def __init__(self, window):
@@ -19,6 +19,9 @@ class App:
 
         self.canvas = Canvas(self.window, width=640, height=480)
         self.canvas.grid(row=2, column=0)
+        
+        self.confidence_label = ttk.Label(self.window, text="Confidence: ")
+        self.confidence_label.grid(row=3, column=0)
 
     def start_detection(self):
         self.label.config(text="Détection active")
@@ -29,14 +32,18 @@ class App:
         self.thread.daemon = True
         self.thread.start()
 
+    def update_confidence(self, confidence):
+        self.confidence_label.config(text=f"Confiance: {confidence:.2f}")
+        
     def update(self):
         while True:
             ret, frame = self.face_detector.cap.read()
             if ret:
-                x, y, w, h = self.face_detector.detect_face()
+                x, y, w, h, confidence = self.face_detector.detect_face()
                 self.face_detector.draw_face_rectangle(frame, x, y, w, h)
                 # self.mouse_mover.move_mouse(x, y)  # Uncomment this if you have the MouseMover class implemented
                 self.show_frame(frame)
+                self.update_confidence(confidence)
 
 
     def show_frame(self, frame):

@@ -1,0 +1,7 @@
+opencv-python
+tkinter
+threading
+pyautogui
+Pillow
+
+
