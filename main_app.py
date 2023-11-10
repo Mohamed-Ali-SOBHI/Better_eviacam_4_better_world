@@ -54,7 +54,13 @@ class App:
                     self.face_detector.draw_face_rectangle(frame, x, y, w, h)
                     self.update_confidence(confidence)
                 elif self.detection_mode == 'iris':
-                    self.iris_detector.detect_iris()  # Assurez-vous que cette méthode modifie le cadre
+                    # Récupération des informations des iris
+                    l_cx, l_cy, l_radius, r_cx, r_cy, r_radius = self.iris_detector.detect_iris()
+
+                    # Si des iris sont détectés (vérifier avec le rayon par exemple)
+                    if l_radius > 0 and r_radius > 0:
+                        self.iris_detector._draw_iris(frame, l_cx, l_cy, l_radius)
+                        self.iris_detector._draw_iris(frame, r_cx, r_cy, r_radius)
 
                 self.show_frame(frame)
 

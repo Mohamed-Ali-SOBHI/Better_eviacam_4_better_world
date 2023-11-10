@@ -12,36 +12,45 @@ class IrisDetector:
         self.camera_handler = camera_handler
 
     def detect_iris(self):
+        ret, frame = self.camera_handler.get_frame()
+        if not ret:
+            print("Failed to get frame from the camera")
+        
+        # Indices pour les iris gauche et droit
+        LEFT_IRIS_INDICES = [474, 475, 476, 477]
+        RIGHT_IRIS_INDICES = [469, 470, 471, 472]
+
+        # Inversion et conversion de la frame pour le traitement
+        frame = cv.flip(frame, 1)
+        rgb_frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
+        img_h, img_w = frame.shape[:2]
+
+        # Traitement avec FaceMesh
         with mp.solutions.face_mesh.FaceMesh(
-                max_num_faces=1,
-                refine_landmarks=True,
-                min_detection_confidence=0.5,
-                min_tracking_confidence=0.5) as face_mesh:
+            max_num_faces=1,
+            refine_landmarks=True,
+            min_detection_confidence=0.5,
+            min_tracking_confidence=0.5) as face_mesh:
 
-            while True:
-                ret, frame = self.camera_handler.get_frame()
-                if not ret:
-                    break
+            results = face_mesh.process(rgb_frame)
 
-                frame = cv.flip(frame, 1)
-                rgb_frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
-                img_h, img_w = frame.shape[:2]
-                results = face_mesh.process(rgb_frame)
+            if results.multi_face_landmarks:
+                mesh_points = np.array(
+                    [np.multiply([p.x, p.y], [img_w, img_h]).astype(int)
+                    for p in results.multi_face_landmarks[0].landmark])
 
-                if results.multi_face_landmarks:
-                    mesh_points = np.array(
-                        [np.multiply([p.x, p.y], [img_w, img_h]).astype(int)
-                         for p in results.multi_face_landmarks[0].landmark])
+                l_cx, l_cy, l_radius = self._calculate_iris(mesh_points, LEFT_IRIS_INDICES)
+                r_cx, r_cy, r_radius = self._calculate_iris(mesh_points, RIGHT_IRIS_INDICES)
 
-                    l_cx, l_cy, l_radius = self._calculate_iris(mesh_points, LEFT_IRIS_INDICES)
-                    r_cx, r_cy, r_radius = self._calculate_iris(mesh_points, RIGHT_IRIS_INDICES)
+                self._draw_iris(frame, l_cx, l_cy, l_radius)
+                self._draw_iris(frame, r_cx, r_cy, r_radius)
 
-                    self._draw_iris(frame, l_cx, l_cy, l_radius)
-                    self._draw_iris(frame, r_cx, r_cy, r_radius)
+                # Renvoyer les informations des iris
+                return l_cx, l_cy, l_radius, r_cx, r_cy, r_radius
 
-                cv.imshow('Iris Detector', frame)
-                if cv.waitKey(1) == ord('q'):
-                    break
+            # Si aucun iris n'est détecté, renvoyer des zéros
+            return 0, 0, 0, 0, 0, 0
+
 
     def _calculate_iris(self, mesh_points, iris_indices):
         iris_points = mesh_points[iris_indices]
