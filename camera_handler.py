@@ -18,4 +18,7 @@ class CameraHandler:
 
     def get_frame(self):
         ret, frame = self.cap.read()
+        if not ret:
+            print("Failed to get frame from the camera")
+            return None, None
         return ret, frame

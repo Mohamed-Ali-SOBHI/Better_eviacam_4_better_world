@@ -2,9 +2,10 @@ import tkinter as tk
 from tkinter import Canvas, ttk
 from PIL import Image, ImageTk
 import threading
-from face_detector import FaceDetector  # Make sure face_detector.py is in the same directory
-from camera_handler import CameraHandler
 import cv2
+from face_detector import FaceDetector
+from iris_detector import IrisDetector
+from camera_handler import CameraHandler
 
 class App:
     def __init__(self, window):
@@ -20,12 +21,20 @@ class App:
         self.canvas = Canvas(self.window, width=640, height=480)
         self.canvas.grid(row=2, column=0)
         
-        self.confidence_label = ttk.Label(self.window, text="Confidence: ")
+        self.confidence_label = ttk.Label(self.window, text="Confiance: ")
         self.confidence_label.grid(row=3, column=0)
-        
+
+        # Initialisation des détecteurs
         self.camera_handler = CameraHandler()
         self.face_detector = FaceDetector(self.camera_handler, min_detection_confidence=0.5)
+        self.iris_detector = IrisDetector(self.camera_handler)  # Assurez-vous que ce fichier est dans le même répertoire
 
+        # Mode de détection initial
+        self.detection_mode = 'face' 
+
+        # Bouton pour changer le mode de détection
+        self.switch_button = ttk.Button(self.window, text="Switch to Iris Detection", command=self.switch_mode)
+        self.switch_button.grid(row=4, column=0)
 
     def start_detection(self):
         self.label.config(text="Détection active")
@@ -38,19 +47,30 @@ class App:
 
     def update(self):
         while True:
-            ret, frame = self.camera_handler.get_frame()  # Use the CameraHandler's method here
+            ret, frame = self.camera_handler.get_frame()
             if ret:
-                x, y, w, h, confidence = self.face_detector.detect_face()
-                self.face_detector.draw_face_rectangle(frame, x, y, w, h)
-                self.show_frame(frame)
-                self.update_confidence(confidence)
+                if self.detection_mode == 'face':
+                    x, y, w, h, confidence = self.face_detector.detect_face()
+                    self.face_detector.draw_face_rectangle(frame, x, y, w, h)
+                    self.update_confidence(confidence)
+                elif self.detection_mode == 'iris':
+                    self.iris_detector.detect_iris()  # Assurez-vous que cette méthode modifie le cadre
 
+                self.show_frame(frame)
 
     def show_frame(self, frame):
         self.image = ImageTk.PhotoImage(image=Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)))
         self.canvas.create_image(0, 0, image=self.image, anchor=tk.NW)
 
-if __name__ == "__main__":
+    def switch_mode(self):
+        if self.detection_mode == 'face':
+            self.detection_mode = 'iris'
+            self.switch_button.config(text="Switch to Face Detection")
+        else:
+            self.detection_mode = 'face'
+            self.switch_button.config(text="Switch to Iris Detection")
+
+if __name__ == '__main__':
     root = tk.Tk()
     app = App(root)
     root.mainloop()
