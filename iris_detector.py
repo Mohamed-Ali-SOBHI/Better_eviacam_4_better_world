@@ -3,10 +3,6 @@ import numpy as np
 import mediapipe as mp
 from camera_handler import CameraHandler
 
-# Constantes pour les indices des iris
-LEFT_IRIS_INDICES = [474, 475, 476, 477]
-RIGHT_IRIS_INDICES = [469, 470, 471, 472]
-
 class IrisDetector:
     def __init__(self, camera_handler):
         self.camera_handler = camera_handler

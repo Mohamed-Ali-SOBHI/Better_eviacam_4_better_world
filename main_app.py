@@ -12,17 +12,14 @@ class App:
         self.window = window
         self.window.title("MVP eViacam")
         
-        self.label = ttk.Label(self.window, text="Cliquez pour activer")
+        self.label = ttk.Label(self.window, text="Détection active")
         self.label.grid(row=0, column=0)
         
-        self.button = ttk.Button(self.window, text="Activer", command=self.start_detection)
-        self.button.grid(row=1, column=0)
-        
         self.canvas = Canvas(self.window, width=640, height=480)
-        self.canvas.grid(row=2, column=0)
+        self.canvas.grid(row=1, column=0)
         
         self.confidence_label = ttk.Label(self.window, text="Confiance: ")
-        self.confidence_label.grid(row=3, column=0)
+        self.confidence_label.grid(row=2, column=0)
 
         # Initialisation des détecteurs
         self.camera_handler = CameraHandler()
@@ -34,10 +31,12 @@ class App:
 
         # Bouton pour changer le mode de détection
         self.switch_button = ttk.Button(self.window, text="Switch to Iris Detection", command=self.switch_mode)
-        self.switch_button.grid(row=4, column=0)
+        self.switch_button.grid(row=3, column=0)
+        
+        # Lancement de la détection
+        self.start_detection()
 
     def start_detection(self):
-        self.label.config(text="Détection active")
         self.thread = threading.Thread(target=self.update, args=())
         self.thread.daemon = True
         self.thread.start()
@@ -63,6 +62,7 @@ class App:
                         self.iris_detector._draw_iris(frame, r_cx, r_cy, r_radius)
 
                 self.show_frame(frame)
+
 
     def show_frame(self, frame):
         self.image = ImageTk.PhotoImage(image=Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)))
