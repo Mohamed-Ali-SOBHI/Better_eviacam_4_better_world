@@ -47,7 +47,6 @@ class IrisDetector:
             # Si aucun iris n'est détecté, renvoyer des zéros
             return 0, 0, 0, 0, 0, 0
 
-
     def _calculate_iris(self, mesh_points, iris_indices):
         iris_points = mesh_points[iris_indices]
         center, radius = cv.minEnclosingCircle(iris_points)
