@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import Canvas, ttk, Toplevel, Scale, Label
+from tkinter import Canvas, ttk
 from PIL import Image, ImageTk
 import threading
 import cv2
@@ -8,6 +8,7 @@ from face_detector import FaceDetector
 from iris_detector import IrisDetector
 from camera_handler import CameraHandler
 from app_settings_ui import SettingsWindow
+from mouse_mover import MouseMover
 
 class App:
     def __init__(self, window):
@@ -18,6 +19,7 @@ class App:
         self.init_detectors()
         self.detection_mode = Config.INITIAL_DETECTION_MODE
         self.start_detection()
+        self.mouse_mover = MouseMover()
 
     def init_ui(self):
 
@@ -65,12 +67,16 @@ class App:
         x, y, w, h, confidence = self.face_detector.detect_face()
         self.face_detector.draw_face_rectangle(frame, x, y, w, h)
         self.update_confidence(confidence)
+        self.mouse_mover.move_mouse(x, y)
 
     def process_iris_detection(self, frame):
         l_cx, l_cy, l_radius, r_cx, r_cy, r_radius = self.iris_detector.detect_iris()
         if l_radius > 0 and r_radius > 0:
             self.iris_detector._draw_iris(frame, l_cx, l_cy, l_radius)
             self.iris_detector._draw_iris(frame, r_cx, r_cy, r_radius)
+            avg_x = (l_cx + r_cx) // 2
+            avg_y = (l_cy + r_cy) // 2
+            self.mouse_mover.move_mouse(avg_x, avg_y)
 
     def show_frame(self, frame):
         self.image = ImageTk.PhotoImage(image=Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)))

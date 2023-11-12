@@ -1,5 +1,4 @@
-import tkinter as tk
-from tkinter import Canvas, ttk, Toplevel, Scale, Label
+from tkinter import ttk, Toplevel, Scale
 from config import Config
 
 class SettingsWindow:
