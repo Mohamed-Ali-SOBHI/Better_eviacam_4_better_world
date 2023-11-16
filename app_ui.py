@@ -9,6 +9,7 @@ from iris_detector import IrisDetector
 from camera_handler import CameraHandler
 from app_settings_ui import SettingsWindow
 from mouse_mover import MouseMover
+from coordinate_mapper import CoordinateMapper
 
 class App:
     def __init__(self, window):
@@ -18,6 +19,8 @@ class App:
         self.init_ui()
         self.init_detectors()
         self.detection_mode = Config.INITIAL_DETECTION_MODE
+        self.mapper = CoordinateMapper(Config.CANVAS_WIDTH, Config.CANVAS_HEIGHT,
+                                       Config.MOUVEMENT_RANGE_X, Config.MOUVEMENT_RANGE_Y)
         self.start_detection()
         self.mouse_mover = MouseMover()
 
@@ -64,11 +67,20 @@ class App:
         self.show_frame(frame)
 
     def process_face_detection(self, frame):
-        x, y, w, h, confidence = self.face_detector.detect_face()
-        self.face_detector.draw_face_rectangle(frame, x, y, w, h)
-        self.update_confidence(confidence)
-        self.mouse_mover.move_mouse(x, y)
-
+        """
+        Process face detection and move the mouse accordingly.
+        """
+        detection_result = self.face_detector.detect_face()
+        if detection_result:
+            x, y, w, h, confidence = detection_result
+            if confidence > Config.MIN_DETECTION_CONFIDENCE:
+                self.face_detector.draw_face_rectangle(frame, x, y, w, h)
+                self.update_confidence(confidence)
+                # Convert detected face position to screen coordinates
+                screen_x, screen_y = self.mapper.convert_to_screen_coordinates(x, y, w, h)
+                # Move the mouse to the converted screen coordinates
+                self.mouse_mover.move_mouse(screen_x, screen_y)
+            
     def process_iris_detection(self, frame):
         l_cx, l_cy, l_radius, r_cx, r_cy, r_radius = self.iris_detector.detect_iris()
         if l_radius > 0 and r_radius > 0:
@@ -76,7 +88,7 @@ class App:
             self.iris_detector._draw_iris(frame, r_cx, r_cy, r_radius)
             avg_x = (l_cx + r_cx) // 2
             avg_y = (l_cy + r_cy) // 2
-            self.mouse_mover.move_mouse(avg_x, avg_y)
+            #self.mouse_mover.move_mouse(avg_x, avg_y)
 
     def show_frame(self, frame):
         self.image = ImageTk.PhotoImage(image=Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)))
