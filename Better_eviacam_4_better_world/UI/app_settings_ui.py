@@ -1,5 +1,5 @@
 from tkinter import ttk, Toplevel, Scale, Label
-from config import Config
+from Better_eviacam_4_better_world.Core.config import Config
 
 class SettingsWindow:
     def __init__(self, master, face_detector, iris_detector, mouse_mover):

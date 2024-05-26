@@ -40,3 +40,22 @@ class MouseMover:
         new_mouse_y = current_mouse_y + smooth_vy
 
         self.mouse_controller.moveTo(new_mouse_x, new_mouse_y)
+        
+    def set_click_mode(self, click_mode):
+        if click_mode == 'no_click':
+            self.mouse_controller.mouseUp()
+        elif click_mode == 'left_click':
+            self.mouse_controller.mouseDown(button='left')
+            self.mouse_controller.mouseUp(button='left')
+        elif click_mode == 'middle_click':
+            self.mouse_controller.mouseDown(button='middle')
+            self.mouse_controller.mouseUp(button='middle')
+        elif click_mode == 'right_click':
+            self.mouse_controller.mouseDown(button='right')
+            self.mouse_controller.mouseUp(button='right')
+        elif click_mode == 'click_and_hold':
+            self.mouse_controller.mouseDown()
+        elif click_mode == 'double_click':
+            self.mouse_controller.doubleClick()
+        else:
+            raise ValueError(f"Invalid click mode: {click_mode}")

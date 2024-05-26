@@ -1,6 +1,6 @@
 import cv2
 import mediapipe as mp
-from camera_handler import *
+from Better_eviacam_4_better_world.Core.camera_handler import *
 
 class FaceDetector:
     def __init__(self, camera_handler, min_detection_confidence=0.5):

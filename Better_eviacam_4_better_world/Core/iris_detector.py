@@ -1,7 +1,7 @@
 import cv2 as cv
 import numpy as np
 import mediapipe as mp
-from camera_handler import CameraHandler
+from Better_eviacam_4_better_world.Core.camera_handler import CameraHandler
 
 class IrisDetector:
     def __init__(self, camera_handler):
