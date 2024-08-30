@@ -59,3 +59,4 @@ class MouseMover:
             self.mouse_controller.doubleClick()
         else:
             raise ValueError(f"Invalid click mode: {click_mode}")
+     
